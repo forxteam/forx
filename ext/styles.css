@@ -1,0 +1,20 @@
+#forx-container {
+	position: fixed;
+	right: 0;
+	top: 0;
+	padding: 20px;
+	width: 200px;
+	height: 100%;
+	z-index: 99999;
+	background-color: #efefef;
+}
+
+#forx-title {
+	font-size: 200%;
+}
+
+#forx-profile-picture {
+	height: 50px;
+	width: 50px;
+	background: url('https://graph.facebook.com/10152050957896920/picture');
+}
