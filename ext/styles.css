@@ -18,3 +18,11 @@
 	width: 50px;
 	background: url('https://graph.facebook.com/10152050957896920/picture');
 }
+
+#forx-container .show-on-checkout {
+	/* don't show on page load, we will show this later after we can determine the checkout price */
+}
+
+#forx-container .forx-hidden {
+	display: none;
+}
