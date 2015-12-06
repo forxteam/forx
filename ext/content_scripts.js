@@ -4,7 +4,8 @@ var FORX_CONTAINER;
 var FORX_ORDER_AMOUNT;
 var FAKE_RATES = {
 	'usd': [{rate: 1.2}, {rate: 1.3}],
-	'jpy': [{rate: 0.3}, {rate: 0.7}]
+	'jpy': [{rate: 0.3}, {rate: 0.7}],
+	'sgd': [{rate: 0.3}, {rate: 0.7}]
 }
 var FORX_RATES = FAKE_RATES;
 var FORX_EXCHANGE_RATE;
@@ -93,6 +94,7 @@ var FORX_WIDGET = (function() {
 			      '<select id="forx-currency-selector">',
 			      	'<option value="usd" selected>USD</option>',
 					'<option value="jpy">JPY</option>',
+					'<option value="jpy">SGD</option>',
 			      '</select>',
 			    '</div>',
 			    '<div class="forx-hidden show-on-checkout">',
