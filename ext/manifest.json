@@ -4,6 +4,9 @@
   "name": "Getting started example",
   "description": "This extension shows a Google Image search result for the current page",
   "version": "1.0",
+  "background": {
+    "scripts": ["jquery-2.1.4.min.js", "background.js"]
+  },
 
   // why is this matching logic so complicated? cos amazon uses some JS to change
   // the page url and chrome doesn't seem to detect that and call this extension...
@@ -23,6 +26,7 @@
     }
   ],
   "permissions": [
+    "http://*.multidom.net/"
     // "tabs",
     // "activeTab",
     // "https://ajax.googleapis.com/"

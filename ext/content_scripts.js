@@ -3,12 +3,13 @@ var ACCEPT_URL = "https://localhost:8080";
 var FORX_CONTAINER;
 var FORX_ORDER_AMOUNT;
 var FAKE_RATES = {
-	'usd': [{rate: 1.2}, {rate: 1.3}],
-	'jpy': [{rate: 0.3}, {rate: 0.7}],
-	'sgd': [{rate: 0.3}, {rate: 0.7}]
-}
-var FORX_RATES = FAKE_RATES;
+	'sgd': {rate: 1.2, datetime: new Date()},
+	'jpy': {rate: 9.7, datetime: new Date()}
+};
+var FORX_RATES = {};
+var FORX_RATES_DATETIME;
 var FORX_EXCHANGE_RATE;
+var FORX_EXCHANGE_RATE_TIME;
 var FORX_COMPUTED_AMOUNT;
 var FORX_AGREE_EXCHANGE_BUTTON;
 var FORX_CURRENCY_SELECTOR;
@@ -82,7 +83,7 @@ var FORX_WIDGET = (function() {
 			var template = [
 			  '<div id="forx-container">',
 			    '<div id="forx-title">',
-			    	'ForX',
+			    	'<img src="https://dl.dropboxusercontent.com/u/98123609/logo.png" width="100px"/>',
 			    '</div>',
 			    '<div id="forx-profile">',
 			      '<div id="forx-profile-picture"></div>',
@@ -92,9 +93,8 @@ var FORX_WIDGET = (function() {
 			    '<div class="forx-hidden show-on-checkout">',
 			      'Currency: ',
 			      '<select id="forx-currency-selector">',
-			      	'<option value="usd" selected>USD</option>',
+			      	'<option value="sgd" selected>SGD</option>',
 					'<option value="jpy">JPY</option>',
-					'<option value="jpy">SGD</option>',
 			      '</select>',
 			    '</div>',
 			    '<div class="forx-hidden show-on-checkout">',
@@ -102,6 +102,9 @@ var FORX_WIDGET = (function() {
 			    '</div>',
 			    '<div class="forx-hidden show-on-checkout">',
 			      'Exchange rate: <span id="forx-exchange-rate"></span>',
+			    '</div>',
+				'<div class="forx-hidden show-on-checkout">',
+			      'as of <span id="forx-exchange-rate-time"></span>',
 			    '</div>',
 			    '<div class="forx-hidden show-on-checkout">',
 			      'Local amount: <span id="forx-computed-amount"></span>',
@@ -128,6 +131,7 @@ var FORX_WIDGET = (function() {
 			FORX_CONTAINER = $('body #forx-container');
 			FORX_ORDER_AMOUNT = FORX_CONTAINER.find('#forx-order-amount')
 			FORX_EXCHANGE_RATE = FORX_CONTAINER.find('#forx-exchange-rate');
+			FORX_EXCHANGE_RATE_TIME = FORX_CONTAINER.find('#forx-exchange-rate-time');
 			FORX_COMPUTED_AMOUNT = FORX_CONTAINER.find('#forx-computed-amount');
 			FORX_SPINNER = FORX_CONTAINER.find('#forx-spinner');
 			FORX_GIFT_CARD_CODE = FORX_CONTAINER.find('#forx-gift-card-code');
@@ -161,26 +165,33 @@ var FORX_WIDGET = (function() {
 		 *   3. Local amount
 		 */
 		updateRateInForX: function(currencyCode) {
-			currencyCode = currencyCode || FORX_WIDGET.getUserSelectedCurrency() || 'usd';
+			currencyCode = currencyCode || FORX_WIDGET.getUserSelectedCurrency() || 'sgd';
 
-			var total = AMAZON_DOM_INTERACTOR.getOrderTotal();
-			if (total === null) {
-				return null;
-			}
+			FORX_NETWORK.fetchOneExchangeRate(currencyCode, function() {
+				console.log('callbacked');
 
-			var rates = FORX_RATES[currencyCode.toLowerCase()];
-			if (typeof rates === "undefined" || rates.length === 0) {
-				return null;
-			}
+				var total = AMAZON_DOM_INTERACTOR.getOrderTotal();
+				if (total === null) {
+					return null;
+				}
 
-			var rate = rates[0].rate;
+				var rates = FORX_RATES[currencyCode.toLowerCase()];
+				if (typeof rates === "undefined" || rates.length === 0) {
+					return null;
+				}
 
-			FORX_ORDER_AMOUNT.text(total);
-			FORX_EXCHANGE_RATE.text(rate);
-			FORX_COMPUTED_AMOUNT.text((total * rate).toFixed(2));
+				// var rate = rates[0].rate;
+				var rateData = FORX_RATES[currencyCode];
+				var rate = rateData.rate;
+				FORX_ORDER_AMOUNT.text(total);
+				FORX_EXCHANGE_RATE.text(rate);
+				FORX_COMPUTED_AMOUNT.text((total * rate).toFixed(2));
+				FORX_EXCHANGE_RATE_TIME.text(rateData.datetime.toTimeString().slice(0, 5));
 
-			unHideElement('.show-on-checkout');
-			hideElement('#forx-not-on-amazon');
+				unHideElement('.show-on-checkout');
+				hideElement('#forx-not-on-amazon');
+
+			});
 		},
 		showGiftCode: function(code) {
 			FORX_GIFT_CARD_CODE.text(code);
@@ -254,16 +265,56 @@ var AMAZON_DOM_INTERACTOR = (function() {
 	}
 }());
 
+var DONE_FETCH = true;
 var FORX_NETWORK = (function() {
 	return {
-		/*
-		 * Fetches a map of exchange rates from server.
-		 * TODO: align with server schema
-		 */
+		fetchOneExchangeRate: function(to, callback) {
+			var port = chrome.runtime.connect({name: "FETCH_EXCHANGE_RATES"});
+			port.postMessage({
+				type: "FETCH_EXCHANGE_RATES",
+				email: 'email',
+				from: 'usd',
+				to: to
+			});
+			port.onMessage.addListener(function(msg) {
+				if (msg.serverResponseType === "ONE_RATE") {
+					var rate = msg.data['CurRate' + to.toUpperCase()] || '0.88';
+					FORX_RATES[to] = {
+						rate: parseFloat(rate),
+						datetime: new Date()
+					}
+					console.log(FORX_RATES['sgd'].rate);
+					callback()
+				}
+			});
+		},
+		// this was used when i thought the endpoint returned ALL exchange rates supported,
+		// but ended up being an endpoint we have to specify we want the currency to convert INTO
 		fetchExchangeRates: function() {
-			return $.post(EXCHANGE_URL, function(data) {
-				FORX_RATES = data;
-			})
+			if (FORX_RATES === null) {
+				if (DONE_FETCH === true) {
+					DONE_FETCH = false;
+					var port = chrome.runtime.connect({name: "FETCH_EXCHANGE_RATES"});
+					port.postMessage({
+						type: "FETCH_EXCHANGE_RATES",
+						email: 'email',
+						from: from,
+						to: to
+					});
+					port.onMessage.addListener(function(msg) {
+						if (msg.serverResponseType === "RATES") {
+							console.log(msg.data);
+							FORX_RATES = msg.data;
+							FORX_RATES_DATETIME = new Date();
+							DONE_FETCH = true;
+						}
+					})
+					console.log('sending message');	
+					chrome.runtime.sendMessage({type: "FETCH_EXCHANGE_RATES"}, function(response) {
+						// response is the object hat is sent back
+					})		
+				}
+			}
 		},
 		getGiftCardCode: function(token) {
 			return $.post(ACCEPT_URL, {
@@ -274,7 +325,6 @@ var FORX_NETWORK = (function() {
 }());
 
 FORX_WIDGET.buildInitialPage();
-FORX_NETWORK.fetchExchangeRates();
 // updateRateInForX();
 // console.log("Total order is: " + getOrderTotal());
 // enterGiftCardCode('GIFT');
