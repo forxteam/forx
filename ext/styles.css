@@ -25,6 +25,14 @@
 	text-align: center;
 }
 
+#forx-profile-picture img {
+	border-radius: 100px;
+}
+
+#forx-profile-name {
+	margin: 0.5em;
+}
+
 #forx-container .show-on-checkout {
 	/* don't show on page load, we will show this later after we can determine the checkout price */
 }
@@ -41,6 +49,7 @@
 #forx-exchange-rate-time-parent {
 	font-size: 75%;
 	font-style: italic;
+	text-align: right;
 }
 
 #forx-exchange-rate-time {
