@@ -79,6 +79,7 @@ var FORX_WIDGET = (function() {
 		/*
 		 * Constructs the html needed to build our ForX widget and injects it onto the page
 		 */
+
 		buildInitialPage: function() {
 			var template = [
 			  '<div id="forx-container">',
@@ -86,30 +87,32 @@ var FORX_WIDGET = (function() {
 			    	'<img src="https://dl.dropboxusercontent.com/u/98123609/logo.png" width="100px"/>',
 			    '</div>',
 			    '<div id="forx-profile">',
-			      '<div id="forx-profile-picture"></div>',
+			      '<div id="forx-profile-picture">',
+			      	'<img width="150" src="https://dl.dropboxusercontent.com/u/104915413/a.jpg" />',
+			      '</div>',
 			      '<div id="forx-profile-name">ForX User</div>',
 			    '</div>',
 			    '<div id="forx-not-on-amazon">Rates will show up when you are on an Amazon checkout page.</div>',
-			    '<div class="forx-hidden show-on-checkout">',
+			    '<p class="forx-hidden show-on-checkout">',
 			      'Currency: ',
 			      '<select id="forx-currency-selector">',
 			      	'<option value="sgd" selected>SGD</option>',
 					'<option value="jpy">JPY</option>',
 			      '</select>',
-			    '</div>',
-			    '<div class="forx-hidden show-on-checkout">',
+			    '</p>',
+			    '<p class="forx-hidden show-on-checkout">',
 			      'Order amount: <span id="forx-order-amount"></span>',
-			    '</div>',
-			    '<div class="forx-hidden show-on-checkout">',
+			    '</p>',
+			    '<p class="forx-hidden show-on-checkout">',
 			      'Exchange rate: <span id="forx-exchange-rate"></span>',
-			    '</div>',
-				'<div class="forx-hidden show-on-checkout">',
-			      'as of <span id="forx-exchange-rate-time"></span>',
-			    '</div>',
-			    '<div class="forx-hidden show-on-checkout">',
+			    '</p>',
+				'<p id="forx-exchange-rate-time-parent" class="forx-hidden show-on-checkout">',
+			      'as of <span id="forx-exchange-rate-time"></span> EST',
+			    '</p>',
+			    '<p class="forx-hidden show-on-checkout">',
 			      'Local amount: <span id="forx-computed-amount"></span>',
-			    '</div>',
-			    '<div class="forx-hidden show-on-checkout">',
+			    '</p>',
+			    '<div id="forx-agree-exchange-parent" class="forx-hidden show-on-checkout">',
 			      '<button id="forx-agree-exchange">Agree</button>',
 			    '</div>',
 			    '<div class="forx-hidden">',
@@ -280,7 +283,7 @@ var FORX_NETWORK = (function() {
 				if (msg.serverResponseType === "ONE_RATE") {
 					var rate = msg.data['CurRate' + to.toUpperCase()] || '0.88';
 					FORX_RATES[to] = {
-						rate: parseFloat(rate),
+						rate: parseFloat(rate).toFixed(2),
 						datetime: new Date()
 					}
 					console.log(FORX_RATES['sgd'].rate);

@@ -3,20 +3,26 @@
 	right: 0;
 	top: 0;
 	padding: 20px;
-	width: 200px;
+	width: 400px;
 	height: 100%;
 	z-index: 99999;
 	background-color: #efefef;
+	font-size: 160%;
 }
 
 #forx-title {
-	font-size: 200%;
+	text-align: center;
+	margin: 1em 0;
+}
+
+#forx-profile {
+	text-align: center;
+	margin: 1em;
 }
 
 #forx-profile-picture {
-	height: 50px;
-	width: 50px;
-	background: url('https://graph.facebook.com/10152050957896920/picture');
+	margin: 0.3em;
+	text-align: center;
 }
 
 #forx-container .show-on-checkout {
@@ -25,4 +31,40 @@
 
 #forx-container .forx-hidden {
 	display: none;
+}
+
+#forx-order-amount, #forx-exchange-rate, #forx-computed-amount {
+	font-weight: 700;
+	font-size: 22px;
+}
+
+#forx-exchange-rate-time-parent {
+	font-size: 75%;
+	font-style: italic;
+}
+
+#forx-exchange-rate-time {
+}
+
+#forx-agree-exchange-parent {
+	text-align: center;
+	margin: 2em;
+}
+
+#forx-agree-exchange {
+	background: #f0c14b;
+    border-color: #a88734 #9c7e31 #846a29;
+    color: #111;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    padding: 0;
+    box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
+    width: 80%;
+    height: 40px;
+    font-size: 13px;
 }
