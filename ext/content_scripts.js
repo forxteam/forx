@@ -11,8 +11,12 @@ var FORX_EXCHANGE_RATE;
 var FORX_COMPUTED_AMOUNT;
 var FORX_AGREE_EXCHANGE_BUTTON;
 var FORX_CURRENCY_SELECTOR;
+var FORX_GIFT_CARD_CODE;
+var FORX_TIMER;
+var FORX_TIMER_EXPIRED;
 var token;
 var FAKE_TOKEN = 'SUPER_SECURE_TOKEN';
+var SECONDS_TO_EXPIRE = 15;
 
 /*
  * Event listeners
@@ -49,11 +53,15 @@ var agreeExchange = function(evt) {
 		FORX_WIDGET.hideSpinner();
 		var code = data['code'];
 		AMAZON_DOM_INTERACTOR.enterGiftCardCode(code);
+		FORX_WIDGET.showGiftCode(code);
+		FORX_WIDGET.showTimer();
 	})
 	.fail(function() {
 		FORX_WIDGET.hideSpinner();
 		var code = FAKE_TOKEN;
 		AMAZON_DOM_INTERACTOR.enterGiftCardCode(code);
+		FORX_WIDGET.showGiftCode(code);
+		FORX_WIDGET.showTimer();
 	})
 };
 
@@ -99,9 +107,16 @@ var FORX_WIDGET = (function() {
 			    '<div class="forx-hidden show-on-checkout">',
 			      '<button id="forx-agree-exchange">Agree</button>',
 			    '</div>',
-			    '<div id="forx-gift-card-code"></div>',
-			    '<div id="forx-timer"></div>',
+			    '<div class="forx-hidden">',
+			    	'Your gift card code is <span id="forx-gift-card-code"></span>',
+			    '</div>',
+			    '<div class="forx-hidden">',
+			    	'You have <span id="forx-timer">' + SECONDS_TO_EXPIRE + '</span> seconds to use this code.',
+			    '</div>',
+			    '<div id="forx-timer-expired" class="forx-hidden">The code has expired, please refresh the page.',
+			    '</div>',
 			    '<div id="forx-spinner"></div>',
+			    '<div id="forx-success-gift-card-code" class="hidden">Successfully applied code.</div>',
 			  '</div>'
 			];
 			var html = template.join('');
@@ -113,6 +128,9 @@ var FORX_WIDGET = (function() {
 			FORX_EXCHANGE_RATE = FORX_CONTAINER.find('#forx-exchange-rate');
 			FORX_COMPUTED_AMOUNT = FORX_CONTAINER.find('#forx-computed-amount');
 			FORX_SPINNER = FORX_CONTAINER.find('#forx-spinner');
+			FORX_GIFT_CARD_CODE = FORX_CONTAINER.find('#forx-gift-card-code');
+			FORX_TIMER = FORX_CONTAINER.find('#forx-timer');
+			FORX_TIMER_EXPIRED = FORX_CONTAINER.find('#forx-timer-expired');
 
 			// add change listener to currency selector
 			FORX_CURRENCY_SELECTOR = FORX_CONTAINER.find('#forx-currency-selector');
@@ -160,7 +178,35 @@ var FORX_WIDGET = (function() {
 			FORX_COMPUTED_AMOUNT.text((total * rate).toFixed(2));
 
 			unHideElement('.show-on-checkout');
-			hideElement('.forx-not-on-amazon');
+			hideElement('#forx-not-on-amazon');
+		},
+		showGiftCode: function(code) {
+			FORX_GIFT_CARD_CODE.text(code);
+			unHideElement(FORX_GIFT_CARD_CODE.parent());
+			FORX_AGREE_EXCHANGE_BUTTON.attr('disabled', true);
+			FORX_CURRENCY_SELECTOR.attr('disabled', true);
+		},
+		showTimer: function(code) {
+			var secondsLeft = SECONDS_TO_EXPIRE;
+			var intervalId = null;
+			console.log(FORX_TIMER);
+			var timer = (function() {
+				intervalId = window.setInterval(function() {
+					if (secondsLeft <= 0) {
+						window.clearInterval(intervalId);
+						FORX_WIDGET.timerExpired();
+					} else {
+						secondsLeft -= 1;
+						FORX_TIMER.text(secondsLeft);
+					}
+				}, 1000);
+			}());
+			unHideElement(FORX_TIMER.parent());
+		},
+		timerExpired: function() {
+			hideElement(FORX_TIMER.parent());
+			hideElement(FORX_GIFT_CARD_CODE.parent());
+			unHideElement(FORX_TIMER_EXPIRED);
 		}
 	}
 }());
