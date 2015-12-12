@@ -3,7 +3,7 @@
 
   "name": "ForX",
   "description": "Pay what you should",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "background": {
     "scripts": ["jquery-2.1.4.min.js", "background.js"]
   },
