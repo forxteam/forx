@@ -84,7 +84,7 @@ var FORX_WIDGET = (function() {
 			var template = [
 			  '<div id="forx-container">',
 			    '<div id="forx-title">',
-			    	'<img src="https://dl.dropboxusercontent.com/u/98123609/logo.png" width="100px"/>',
+			    	'<img src="https://dl.dropboxusercontent.com/u/104915413/ratex.png" width="100px"/>',
 			    '</div>',
 			    '<div id="forx-profile">',
 			      '<div id="forx-profile-picture">',
